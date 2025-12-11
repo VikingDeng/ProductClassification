@@ -1,7 +1,7 @@
 import argparse
 import os
 
-import src.data
+import src.dataset
 import src.models
 import src.runners
 

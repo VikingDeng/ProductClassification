@@ -1,0 +1,8 @@
+[TRAIN] Runner: KFoldRunner
+2025-12-12 00:25:21,647 - INFO - Starting 5-Fold Cross Validation...
+Using a slow image processor as `use_fast` is unset and a slow processor was saved with this model. `use_fast=True` will be the default behavior in v4.52, even if the model was saved with a slow processor. This will result in minor differences in outputs. You'll still be able to use a slow processor with `use_fast=False`.
+2025-12-12 00:25:34,907 - INFO - ========== Fold 1 / 5 ==========
+2025-12-12 00:25:34,908 - INFO - Loading CLIP Vision: openai/clip-vit-base-patch32
+2025-12-12 00:26:06,418 - INFO - Loading CLIP Text: openai/clip-vit-base-patch32
+2025-12-12 00:26:08,304 - INFO - Optimizer setup: Backbone LR=1e-05, Head LR=0.0001
+[Fold 1] Ep 1 Train:   0%|          | 0/420 [00:00<?, ?it/s]
