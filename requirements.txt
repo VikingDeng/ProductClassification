@@ -1,0 +1,10 @@
+torch
+torchvision
+transformers
+pandas
+numpy
+PyYAML
+scikit-learn
+opencv-python-headless
+tensorboard
+tqdm

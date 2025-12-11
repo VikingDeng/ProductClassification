@@ -1,0 +1,75 @@
+dataset:
+  train:
+    type: "ProductDataset"
+    data_root: "./data"
+    csv_file: "train.csv"
+    img_dir: "train_images"
+    mode: "train"
+    img_pipeline:
+      - type: "CLIPImageProcessor"
+        model_name: "openai/clip-vit-base-patch32"
+    
+    text_pipeline:
+      - type: "CLIPTextTokenizer"
+        model_name: "openai/clip-vit-base-patch32"
+        max_len: 77
+
+  val:
+    type: "ProductDataset"
+    data_root: "./data"
+    csv_file: "train.csv" 
+    img_dir: "train_images"
+    mode: "train"
+    img_pipeline:
+      - type: "CLIPImageProcessor"
+        model_name: "openai/clip-vit-base-patch32"
+    text_pipeline:
+      - type: "CLIPTextTokenizer"
+        model_name: "openai/clip-vit-base-patch32"
+        max_len: 77
+
+  test:
+    type: "ProductDataset"
+    data_root: "./data"
+    csv_file: "test.csv"
+    img_dir: "test_images"
+    mode: "test"
+    img_pipeline:
+      - type: "CLIPImageProcessor"
+        model_name: "openai/clip-vit-base-patch32"
+    text_pipeline:
+      - type: "CLIPTextTokenizer"
+        model_name: "openai/clip-vit-base-patch32"
+        max_len: 77
+
+model:
+  img_backbone:
+    type: "CLIPVision"
+    model_name: "openai/clip-vit-base-patch32"
+    freeze: True
+  
+  text_backbone:
+    type: "CLIPText"
+    model_name: "openai/clip-vit-base-patch32"
+    freeze: True
+  
+  head:
+    type: "ConcatHead"
+    num_classes: 21
+    dropout: 0.5
+
+workflows:
+  train:
+    type: "KFoldRunner"
+    work_dir: "./work_dirs/exp_clip_kfold"
+    epochs: 10
+    batch_size: 32
+    lr: 0.001 
+    n_splits: 5
+    device: "cuda"
+
+  test:
+    type: "TestRunner"
+    work_dir: "./work_dirs/exp_clip_kfold"
+    batch_size: 64
+    output_file: "submission_clip.csv"

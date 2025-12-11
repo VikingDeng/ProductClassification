@@ -1,0 +1,63 @@
+dataset:
+  train:
+    type: "ProductDataset"
+    data_root: "./data"
+    csv_file: "train.csv"
+    img_dir: "train_images"
+    mode: "train"
+    img_pipeline:
+      - type: "CLIPImageProcessor"
+        model_name: "openai/clip-vit-base-patch32"
+        use_augment: True 
+    text_pipeline:
+      - type: "CLIPTextTokenizer"
+        model_name: "openai/clip-vit-base-patch32"
+        max_len: 77
+
+  test:
+    type: "ProductDataset"
+    data_root: "./data"
+    csv_file: "test.csv"
+    img_dir: "test_images"
+    mode: "test"
+    img_pipeline:
+      - type: "CLIPImageProcessor"
+        model_name: "openai/clip-vit-base-patch32"
+        use_augment: False
+    text_pipeline:
+      - type: "CLIPTextTokenizer"
+        model_name: "openai/clip-vit-base-patch32"
+        max_len: 77
+
+model:
+  img_backbone:
+    type: "CLIPVision"
+    model_name: "openai/clip-vit-base-patch32"
+    # 必须解冻，才能让CLIP适应你的商品图
+    freeze: False 
+  
+  text_backbone:
+    type: "CLIPText"
+    model_name: "openai/clip-vit-base-patch32"
+    freeze: False
+  
+  head:
+    type: "ConcatHead"
+    num_classes: 21
+    dropout: 0.5
+
+workflows:
+  train:
+    type: "KFoldRunner"
+    work_dir: "./work_dirs/exp_clip_finetune"
+    epochs: 30
+    batch_size: 64
+    lr: 0.0001        
+    n_splits: 5
+    device: "cuda"
+
+  test:
+    type: "TestRunner"
+    work_dir: "./work_dirs/exp_clip_finetune"
+    batch_size: 64
+    output_file: "submission_finetune.csv"

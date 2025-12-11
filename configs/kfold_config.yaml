@@ -1,0 +1,64 @@
+dataset:
+  train:
+    type: "ProductDataset"
+    data_root: "./data"
+    csv_file: "train.csv"
+    img_dir: "train_images"
+    mode: "train"
+    img_pipeline:
+      - type: "Resize"
+        size: [224, 224]
+      - type: "ToTensor"
+      - type: "Normalize"
+        mean: [0.485, 0.456, 0.406]
+        std: [0.229, 0.224, 0.225]
+    text_pipeline:
+      - type: "BertTokenizer"
+        model_name: "bert-base-uncased"
+
+  test:
+    type: "ProductDataset"
+    data_root: "./data"
+    csv_file: "test.csv"
+    img_dir: "test_images"
+    mode: "test"
+    img_pipeline:
+      - type: "Resize"
+        size: [224, 224]
+      - type: "ToTensor"
+      - type: "Normalize"
+        mean: [0.485, 0.456, 0.406]
+        std: [0.229, 0.224, 0.225]
+    text_pipeline:
+      - type: "BertTokenizer"
+        model_name: "bert-base-uncased"
+
+model:
+  img_backbone:
+    type: "ResNet50"
+    model_name: "resnet50"
+    freeze: False
+  text_backbone:
+    type: "BertBase"
+    model_name: "bert-base-uncased"
+    freeze: True
+  head:
+    type: "ConcatHead"
+    num_classes: 21
+    dropout: 0.5
+
+workflows:
+  train:
+    type: "KFoldRunner"
+    work_dir: "./work_dirs/exp_kfold"
+    epochs: 10
+    batch_size: 32
+    lr: 0.0001
+    n_splits: 5
+    device: "cuda"
+
+  test:
+    type: "TestRunner"
+    work_dir: "./work_dirs/exp_kfold"
+    batch_size: 64
+    output_file: "submission.csv"
