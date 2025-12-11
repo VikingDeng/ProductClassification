@@ -33,7 +33,6 @@ model:
   img_backbone:
     type: "CLIPVision"
     model_name: "openai/clip-vit-base-patch32"
-    # 必须解冻，才能让CLIP适应你的商品图
     freeze: False 
   
   text_backbone:
@@ -41,7 +40,7 @@ model:
     model_name: "openai/clip-vit-base-patch32"
     freeze: False
   
-   head:
+  head:
     type: "CrossAttentionHead"
     num_classes: 21
     hidden_dim: 512
