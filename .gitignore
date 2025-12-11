@@ -7,3 +7,4 @@ __pycache__
 nohup.out
 dump.py
 code.txt
+.DS_Store
