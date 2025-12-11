@@ -41,9 +41,11 @@ model:
     model_name: "openai/clip-vit-base-patch32"
     freeze: False
   
-  head:
-    type: "ConcatHead"
+   head:
+    type: "CrossAttentionHead"
     num_classes: 21
+    hidden_dim: 512
+    num_heads: 8
     dropout: 0.5
 
 workflows:
