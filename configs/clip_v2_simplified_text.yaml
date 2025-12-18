@@ -1,0 +1,64 @@
+dataset:
+  train:
+    type: "SimplifiedProductDataset"
+    data_root: "./data"
+    csv_file: "train_precomputed.csv"
+    img_dir: "train_images"
+    mode: "train"
+    img_pipeline:
+      - type: "CLIPImageProcessor"
+        model_name: "openai/clip-vit-base-patch32"
+        use_augment: True
+    text_pipeline:
+      - type: "CLIPTextTokenizer"
+        model_name: "openai/clip-vit-base-patch32"
+        max_len: 77
+
+  test:
+    type: "SimplifiedProductDataset"
+    data_root: "./data"
+    csv_file: "test_precomputed.csv"
+    img_dir: "test_images"
+    mode: "test"
+    img_pipeline:
+      - type: "CLIPImageProcessor"
+        model_name: "openai/clip-vit-base-patch32"
+        use_augment: False
+    text_pipeline:
+      - type: "CLIPTextTokenizer"
+        model_name: "openai/clip-vit-base-patch32"
+        max_len: 77
+
+model:
+  img_backbone:
+    type: "CLIPVision"
+    model_name: "openai/clip-vit-base-patch32"
+    freeze: False
+
+  text_backbone:
+    type: "CLIPText"
+    model_name: "openai/clip-vit-base-patch32"
+    freeze: False
+
+  head:
+    type: "CrossAttentionHead"
+    num_classes: 21
+    hidden_dim: 512
+    num_heads: 8
+    dropout: 0.5
+
+workflows:
+  train:
+    type: "KFoldRunnerSpeedUp"
+    work_dir: "./work_dirs/exp_clip_finetune"
+    epochs: 30
+    batch_size: 64
+    lr: 0.0001
+    n_splits: 5
+    device: "cuda"
+
+  test:
+    type: "TestRunner"
+    work_dir: "./work_dirs/exp_clip_finetune"
+    batch_size: 64
+    output_file: "submission_finetune2-1.csv"
