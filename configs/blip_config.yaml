@@ -1,0 +1,63 @@
+# blip_product_classification.yaml
+dataset:
+  train:
+    type: "BlipProductDataset"
+    data_root: "./data"
+    csv_file: "train_precomputed.csv"
+    img_dir: "train_images"
+    mode: "train"
+    # 替换为BLIP统一处理器，合并图像和文本处理
+    processor:
+      type: "BlipProcessor"
+      model_name: "Salesforce/blip-image-captioning-base"#"Salesforce/blip-vqa-base"#
+      use_augment: True  # 训练时开启图像增强
+      max_text_len: 64  # BLIP支持更长的文本（标题+描述拼接）
+
+  test:
+    type: "BlipProductDataset"
+    data_root: "./data"
+    csv_file: "test_precomputed.csv"
+    img_dir: "test_images"
+    mode: "test"
+    processor:
+      type: "BlipProcessor"
+      model_name: "Salesforce/blip-image-captioning-base"#"Salesforce/blip-vqa-base"#
+      use_augment: False # 测试时关闭图像增强
+      max_text_len: 64
+
+model:
+  # BLIP的视觉骨干（替换CLIPVision）
+  img_backbone:
+    type: "BlipVision"
+    model_name: "Salesforce/blip-image-captioning-base"#"Salesforce/blip-vqa-base"#
+    freeze: False  # 建议微调，BLIP的视觉层适配性更好
+
+  # BLIP的文本骨干（替换CLIPText）
+  text_backbone:
+    type: "BlipText"
+    model_name: "Salesforce/blip-image-captioning-base"#"Salesforce/blip-vqa-base"#
+    freeze: False
+
+  # 保留交叉注意力头，调整维度适配BLIP（BLIP的特征维度是768）
+  head:
+    type: "CrossAttentionHead"
+    num_classes: 21
+    hidden_dim: 768  # BLIP的特征维度是768（CLIP是512，此处修改）
+    num_heads: 8
+    dropout: 0.3     # 微调dropout，BLIP过拟合风险更低
+
+workflows:
+  train:
+    type: "BlipKFoldRunnerSpeedUp"
+    work_dir: "./work_dirs/exp_blip_finetune"
+    epochs: 20  # BLIP收敛更快，减少epochs
+    batch_size: 16  # BLIP的参数量略大，适当减小batch_size（根据GPU显存调整）
+    lr: 5e-5    # BLIP的微调学习率建议用5e-5（CLIP是1e-4，此处修改）
+    n_splits: 5
+    device: "cuda"
+
+  test:
+    type: "BlipTestRunner"
+    work_dir: "./work_dirs/exp_blip_finetune"
+    batch_size: 64
+    output_file: "submission_blip_finetune.csv"
